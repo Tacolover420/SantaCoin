@@ -2135,12 +2135,15 @@ bool CBlock::CheckBlock(bool fCheckPOW, bool fCheckMerkleRoot, bool fCheckSig) c
             nProofOfIndexDevops = 1;
             if (vtx[isProofOfStake].vout.size() != 2) {
                     LogPrintf("CheckBlock() : PoW submission doesn't include devops payment\n");
-                    fBlockHasPayments = false;
+                    // Skip check during transition to new DevOps
+                    if (pindexBest->nHeight > 2) {
+                        fBlockHasPayments = false;
+                    }
             }
             nStandardPayment = GetProofOfWorkReward(nBestHeight, 0);
         }
         // Set payout values depending if PoW/PoS
-        nDevopsPayment = GetDevOpsPayment(pindexBest->nHeight, nStandardPayment) / COIN;
+        nDevopsPayment = GetDevOpsPayment(pindexBest->nHeight+1, nStandardPayment) / COIN;
         LogPrintf("Hardset DevOpsPayment: %lu \n", nDevopsPayment);
         // Devops Address Set and Updates
         strVfyDevopsAddress = Params().DevOpsAddress();
@@ -2161,7 +2164,7 @@ bool CBlock::CheckBlock(bool fCheckPOW, bool fCheckMerkleRoot, bool fCheckSig) c
                       LogPrintf("CheckBlock() : PoW Recipient devops address validity succesfully verified\n");
                    } else {
                        // Skip check during transition to new DevOps
-                       if (pindexBest->GetBlockTime() > 1576118300) {
+                       if (pindexBest->nHeight > 2) {
                             // Re-enable enforcement post initial chain startup
                             LogPrintf("CheckBlock() : PoW Recipient devops address validity could not be verified\n");
                             fBlockHasPayments = false;
@@ -2172,7 +2175,7 @@ bool CBlock::CheckBlock(bool fCheckPOW, bool fCheckMerkleRoot, bool fCheckSig) c
                    if (nAmount == nDevopsPayment) {
                       LogPrintf("CheckBlock() : PoW Recipient devops amount validity succesfully verified\n");
                    } else {
-                       if (pindexBest->GetBlockTime() < 1576118301) {
+                       if (pindexBest->nHeight < 3) {
                            LogPrintf("CheckBlock() : PoW Recipient devops amount skipping during chain initial startup\n");
                        } else {
                            if (nIndexedDevopsPayment >= nDevopsPayment) {

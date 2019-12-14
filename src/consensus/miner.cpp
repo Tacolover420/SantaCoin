@@ -377,7 +377,7 @@ CBlock* CreateNewBlock(CReserveKey& reservekey, bool fProofOfStake, int64_t* pFe
 
             // Check for payment update fork
             if(pindexBest->GetBlockTime() > 0){
-                // masternode/devops payment
+                // devops payment
                 int64_t blockReward = GetProofOfWorkReward(pindexPrev->nHeight + 1, nFees);
                 bool hasPayment = true;
                 CScript do_payee;
